@@ -1,0 +1,77 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  sam-simple stepfunc
+
+  Sample SAM Template for sam-simple stepfunc
+
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+  HelloWorldFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: hello_world/
+      Handler: app.lambda_handler
+      Runtime: python3.8
+      Events:
+        HelloWorld:
+          Type: Api
+          Properties:
+            Path: /hello
+            Method: get
+
+  ChildStepMachine:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      DefinitionUri: stepfunction/child.asl.json
+      Policies:
+      - LambdaInvokePolicy:
+          FunctionName: !Ref HelloWorldFunction
+
+  FatherStepMachine:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      DefinitionUri: stepfunction/father.asl.json
+      Role: !GetAtt FatherWorkflowRole.Arn
+      DefinitionSubstitutions:
+        ChildStepMachineArn: !Ref ChildStepMachine
+  
+  FatherWorkflowRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+               Service:
+                - !Sub states.${AWS::Region}.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: FatherWorkflowExecutionPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                 - states:StartExecution
+                Resource:
+                 - !Ref ChildStepMachine
+             # The following stanzas are required for .sync invocations of workflows
+              - Effect: Allow
+                Action:
+                  - states:DescribeExecution
+                  - states:StopExecution
+                Resource:
+                  - !Ref ChildStepMachine
+              - Effect: Allow
+                Action:
+                 - events:PutTargets
+                 - events:PutRule
+                 - events:DescribeRule
+                Resource:
+                 - !Sub "arn:aws:events:${AWS::Region}:${AWS::AccountId}:rule/StepFunctionsGetEventsForStepFunctionsExecutionRule"
+      

@@ -1,0 +1,19 @@
+{
+    "Comment": "A state machine that calls another step machine.",
+    "StartAt": "Call another step function",
+    "States": {
+        "Call another step function": {
+            "Type": "Task",
+            "Resource":"arn:aws:states:::states:startExecution.sync",
+            "Parameters":{  
+                "Input":{
+                    "Comment": "Hello world!"
+                },
+                "StateMachineArn":"${ChildStepMachineArn}",
+                "Name":"ExecutionName"
+            },
+            "End":true
+            
+        }
+    }
+}
