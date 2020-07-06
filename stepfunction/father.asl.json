@@ -4,16 +4,25 @@
     "States": {
         "Call another step function": {
             "Type": "Task",
-            "Resource":"arn:aws:states:::states:startExecution.sync",
-            "Parameters":{  
-                "Input":{
-                    "Comment": "Hello world!"
-                },
-                "StateMachineArn":"${ChildStepMachineArn}",
-                "Name":"ExecutionName"
+            "Resource":"arn:aws:states:::states:startExecution.sync:2",
+            "Parameters":{
+                "Input": {
+                    "IsHelloWorldExample.$": "$.first.IsHelloWorldExample"
             },
-            "End":true
-            
+            "StateMachineArn":"${ChildStepMachineArn}"
+        },
+            "Next":"Call another step function again"
+        },
+        "Call another step function again": {
+            "Type": "Task",
+            "Resource":"arn:aws:states:::states:startExecution.sync:2",
+            "Parameters":{
+                "Input":{
+                    "IsHelloWorldExample.$": "$.second.IsHelloWorldExample"
+                },
+                "StateMachineArn":"${ChildStepMachineArn}"
+            },
+            "End":true   
         }
     }
 }

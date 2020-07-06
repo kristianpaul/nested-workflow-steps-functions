@@ -13,12 +13,12 @@
             "Choices": [
                 {
                     "Variable": "$.IsHelloWorldExample",
-                    "BooleanEquals": true,
+                    "StringEquals": "11",
                     "Next": "Yes"
                 },
                 {
                     "Variable": "$.IsHelloWorldExample",
-                    "BooleanEquals": false,
+                    "StringEquals": "00",
                     "Next": "No"
                 }
             ],
@@ -26,16 +26,16 @@
         },
         "Yes": {
             "Type": "Pass",
-            "Next": "Wait 3 sec"
+            "Next": "Wait  5 sec"
         },
         "No": {
             "Type": "Fail",
             "Cause": "Not Hello World"
         },
-        "Wait 3 sec": {
+        "Wait  5 sec": {
             "Comment": "A Wait state delays the state machine from continuing for a specified time.",
             "Type": "Wait",
-            "Seconds": 3,
+            "Seconds": 5,
             "Next": "Parallel State"
         },
         "Parallel State": {
